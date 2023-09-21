@@ -12,6 +12,7 @@ BIM_URL = 'https://www.bim.com.tr/Categories/680/afisler.aspx'
 A101G_URL = 'https://www.a101.com.tr/aldin-aldin-gelecek-hafta-brosuru/'
 A101B_URL = 'https://www.a101.com.tr/aldin-aldin-bu-hafta-brosuru/'
 SOK_URL = 'https://kurumsal.sokmarket.com.tr/haftanin-firsatlari/firsatlar'
+MIGROS_URL = 'https://www.money.com.tr/migroskop-dijital'
 
 def initialize_database():
     conn = sqlite3.connect(DATABASE_NAME)
@@ -106,6 +107,15 @@ def scrape_sok():
     
     insert_data_into_database(current_date_sok, ['https://kurumsal.sokmarket.com.tr' + links[22], 'https://kurumsal.sokmarket.com.tr' + links[23]])
 
+def scrape_migros():
+    r = requests.get(MIGROS_URL)
+    source = BeautifulSoup(r.content, "lxml")
+    temp = source.find_all('button', class_="btn btn-white-purple-line center-block _df_button")
+    link = [temp[0].get("source")]
+    date= temp[0].get("mcdate")
+    
+    insert_data_into_database(date, link)
+
 def reset_database():
     # Close any existing connections
     conn = sqlite3.connect(DATABASE_NAME)
@@ -132,6 +142,9 @@ if __name__ == "__main__":
     
     # Scraping and inserting data for SOK
     scrape_sok()
+
+    # Scraping and inserting data for MIGROS
+    scrape_migros()
     
     # Run the Flask app
-    app.run(debug=False)
+    app.run(debug=True)
