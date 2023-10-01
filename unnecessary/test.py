@@ -12,13 +12,16 @@ url_a101g = 'https://www.a101.com.tr/aldin-aldin-gelecek-hafta-brosuru/'
 url_a101b = 'https://www.a101.com.tr/aldin-aldin-bu-hafta-brosuru/'
 url_sok = 'https://kurumsal.sokmarket.com.tr/haftanin-firsatlari/firsatlar'
 MIGROS_URL = 'https://www.money.com.tr/migroskop-dijital'
+GRATIS_URL = 'https://view.publitas.com/gratis'
 
 
-r = requests.get(MIGROS_URL)
+r = requests.get(GRATIS_URL)
 source = BeautifulSoup(r.content, "lxml")
-temp = source.find_all('button', class_="btn btn-white-purple-line center-block _df_button")
-print(temp)
-link = temp[0].get("source")
-print(link)
-date= temp[0].get("mcdate")
-print(date)
+# Find the relevant img element
+img_element = source.find_all('div')
+print(img_element)
+# Extract the image source (link)
+#image_link = img_element.get['src']
+
+# Print the extracted image link
+#print(image_link)

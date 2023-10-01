@@ -30,6 +30,7 @@ def initialize_database():
             link_id INTEGER PRIMARY KEY AUTOINCREMENT,
             date_id INTEGER,
             link TEXT,
+            shop TEXT,
             FOREIGN KEY (date_id) REFERENCES dates (date_id)
         )
     ''')
@@ -37,7 +38,7 @@ def initialize_database():
     conn.commit()
     conn.close()
 
-def insert_data_into_database(date, image_links):
+def insert_data_into_database(date, image_links, shop):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
 
@@ -51,12 +52,13 @@ def insert_data_into_database(date, image_links):
 
     # Insert the links into the 'links' table with the associated date_id
     for image_link in image_links:
-        cursor.execute("INSERT INTO links (date_id, link) VALUES (?, ?)", (date_id, image_link))
+        cursor.execute("INSERT INTO links (date_id, link, shop) VALUES (?, ?, ?)", (date_id, image_link, shop))
         conn.commit()
 
     conn.close()
 
 def scrape_bim():
+    shop = "BİM"
     r = requests.get(BIM_URL)
     source = BeautifulSoup(r.content, "lxml")
     items = source.find_all('div', class_='grup1 genelgrup col-12 col-md-6 rightArea')
@@ -65,9 +67,10 @@ def scrape_bim():
         date = item.find('span', class_='text').text.strip()
         image_links = ['https://www.bim.com.tr' + img['data-bigimg'] for img in item.find_all('a', class_='small')]
         
-        insert_data_into_database(date, image_links)
+        insert_data_into_database(date, image_links, shop)
 
 def scrape_a101b():
+    shop = "A101"
     r = requests.get(A101B_URL)
     source = BeautifulSoup(r.content, "lxml")
     temp = source.find(class_="brochure-tabs")
@@ -78,9 +81,10 @@ def scrape_a101b():
     date = dates.split('"')
     current_date = date[3].strip()  # Extract and clean the date
     
-    insert_data_into_database(current_date, [item.find('img')['src'] for item in items])
+    insert_data_into_database(current_date, [item.find('img')['src'] for item in items], shop)
 
 def scrape_a101g():
+    shop = "A101"
     r = requests.get(A101G_URL)
     source = BeautifulSoup(r.content, "lxml")
     temp = source.find(class_="brochure-tabs")
@@ -91,9 +95,10 @@ def scrape_a101g():
     date = dates.split('"')
     current_date = date[3].strip()  # Extract and clean the date
     
-    insert_data_into_database(current_date, [item.find('img')['src'] for item in items])
+    insert_data_into_database(current_date, [item.find('img')['src'] for item in items], shop)
 
 def scrape_sok():
+    shop = "ŞOK"
     r = requests.get(SOK_URL)
     source = BeautifulSoup(r.content, "lxml")
     temp = source.find_all('a')
@@ -105,16 +110,17 @@ def scrape_sok():
 
     current_date_sok = "Your Date Here"  # Replace with the actual date
     
-    insert_data_into_database(current_date_sok, ['https://kurumsal.sokmarket.com.tr' + links[22], 'https://kurumsal.sokmarket.com.tr' + links[23]])
+    insert_data_into_database(current_date_sok, ['https://kurumsal.sokmarket.com.tr' + links[22], 'https://kurumsal.sokmarket.com.tr' + links[23]], shop)
 
 def scrape_migros():
+    shop = "MİGROS"
     r = requests.get(MIGROS_URL)
     source = BeautifulSoup(r.content, "lxml")
     temp = source.find_all('button', class_="btn btn-white-purple-line center-block _df_button")
     link = [temp[0].get("source")]
     date= temp[0].get("mcdate")
     
-    insert_data_into_database(date, link)
+    insert_data_into_database(date, link, shop)
 
 def reset_database():
     # Close any existing connections
